@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-x86:
+    name: Build benchmarks (x86-64)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libsuitesparse-dev
+
+      - name: Build CHOLMOD benchmark
+        run: |
+          mkdir -p benchmarks/cholmod/build
+          cd benchmarks/cholmod/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Build KLU benchmark
+        run: |
+          mkdir -p benchmarks/klu/build
+          cd benchmarks/klu/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Build UMFPACK benchmark
+        run: |
+          mkdir -p benchmarks/umfpack/build
+          cd benchmarks/umfpack/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Run CHOLMOD benchmark
+        run: benchmarks/cholmod/build/bench_cholmod 50 50
+
+      - name: Run KLU benchmark
+        run: benchmarks/klu/build/bench_klu
+
+      - name: Run UMFPACK benchmark
+        run: benchmarks/umfpack/build/bench_umfpack 50 50
+
+  lint:
+    name: Lint (clang-format)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check formatting
+        run: find benchmarks -name "*.cpp" | xargs clang-format --dry-run --Werror
