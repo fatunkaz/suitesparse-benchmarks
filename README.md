@@ -1,5 +1,6 @@
 # SuiteSparse Benchmark Suite
 
+[![CI](https://github.com/fatunkaz/suitesparse-benchmarks/actions/workflows/ci.yml/badge.svg)](https://github.com/fatunkaz/suitesparse-benchmarks/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Reproducible benchmark suite for measuring and comparing the performance of
