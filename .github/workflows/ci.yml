@@ -97,6 +97,8 @@ jobs:
       - name: Build GraphBLAS benchmark
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
+          grep -c "extern.*C" /usr/include/GraphBLAS.h || true
+          head -30 /usr/include/GraphBLAS.h
           g++ -O3 -DNDEBUG -std=c++11 \
             -I/usr/include \
             -I/usr/include/suitesparse \
@@ -104,7 +106,7 @@ jobs:
             -o benchmarks/graphblas/build_riscv64_native/bench_graphblas \
             /usr/lib/riscv64-linux-gnu/libgraphblas.so.7 \
             /usr/lib/riscv64-linux-gnu/libsuitesparseconfig.so \
-            -lm -lpthread
+            -lm -lpthread -lstdc++
 
       - name: Run CHOLMOD benchmark (native RISC-V)
         run: |
