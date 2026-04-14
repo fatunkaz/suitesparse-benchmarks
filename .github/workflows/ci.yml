@@ -83,13 +83,21 @@ jobs:
           make
 
       - name: Run CHOLMOD benchmark (native RISC-V)
-        run: benchmarks/cholmod/build_riscv64_native/bench_cholmod 50 50
+        run: |
+          mkdir -p results
+          benchmarks/cholmod/build_riscv64_native/bench_cholmod 316 316 | tee results/cholmod_riscv64_native.txt
 
       - name: Run KLU benchmark (native RISC-V)
-        run: benchmarks/klu/build_riscv64_native/bench_klu
+        run: benchmarks/klu/build_riscv64_native/bench_klu | tee results/klu_riscv64_native.txt
 
       - name: Run UMFPACK benchmark (native RISC-V)
-        run: benchmarks/umfpack/build_riscv64_native/bench_umfpack 50 50
+        run: benchmarks/umfpack/build_riscv64_native/bench_umfpack 100 100 | tee results/umfpack_riscv64_native.txt
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: riscv64-native-results
+          path: results/
 
   lint:
     name: Lint (clang-format)
