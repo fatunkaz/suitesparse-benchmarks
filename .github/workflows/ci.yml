@@ -94,12 +94,9 @@ jobs:
           find /usr -name "GraphBLAS.h" 2>/dev/null
 
       - name: Build GraphBLAS benchmark
-        continue-on-error: true
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
-          cd benchmarks/graphblas/build_riscv64_native
-          cmake .. -DCMAKE_BUILD_TYPE=Release             -DGRAPHBLAS_INCLUDE_DIR=/usr/include/suitesparse             -DGRAPHBLAS_LIB=/usr/lib/riscv64-linux-gnu/libgraphblas.so             -DCONFIG_LIB=/usr/lib/riscv64-linux-gnu/libsuitesparseconfig.so
-          make
+          g++ -O3 -DNDEBUG -std=c++11             -I/usr/include             -I/usr/include/suitesparse             benchmarks/graphblas/bench_graphblas.cpp             -o benchmarks/graphblas/build_riscv64_native/bench_graphblas             -L/usr/lib/riscv64-linux-gnu             -lgraphblas -lsuitesparseconfig -lm -lpthread
 
       - name: Run GraphBLAS benchmark (native RISC-V)
         run: |
