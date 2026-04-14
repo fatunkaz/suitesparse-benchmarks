@@ -93,8 +93,7 @@ jobs:
 
       - name: Run benchmarks via run_riscv64.sh
         run: |
-          ls matrices/HEP-th-new/ || echo "Matrix not found"
-          ./scripts/run_riscv64.sh || cat results/graphblas_riscv64.txt || echo "No output file"
+          ./scripts/run_riscv64.sh
 
       - name: Upload results
         uses: actions/upload-artifact@v4
