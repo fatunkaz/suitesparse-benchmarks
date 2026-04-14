@@ -80,6 +80,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libsuitesparse-dev
+
+      - name: Download test matrix
+        run: |
+          mkdir -p matrices
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz"             -o /tmp/HEP-th-new.tar.gz
+          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
+
       - name: Run benchmarks via run_riscv64.sh
         run: ./scripts/run_riscv64.sh
 
