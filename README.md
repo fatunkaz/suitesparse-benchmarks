@@ -40,7 +40,7 @@ suitesparse-benchmarks/
 
 ## Requirements
 
-**Host:** x86-64 machine running Linux (Ubuntu 24.04 recommended)
+**Host:** ONLY FOR x86-64 machine running Linux (Ubuntu 24.04 recommended)
 
 ### System packages
 
