@@ -88,6 +88,11 @@ jobs:
           curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" -o /tmp/HEP-th-new.tar.gz
           tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
 
+      - name: Find GraphBLAS library
+        run: |
+          find /usr -name "libgraphblas*" 2>/dev/null
+          find /usr -name "GraphBLAS.h" 2>/dev/null
+
       - name: Build GraphBLAS benchmark
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
