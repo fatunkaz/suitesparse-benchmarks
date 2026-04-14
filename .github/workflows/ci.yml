@@ -101,6 +101,51 @@ jobs:
           name: riscv64-native-results
           path: results/
 
+  sanitizers:
+    name: Sanitizers (ASan + UBSan)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libsuitesparse-dev
+
+      - name: Build CHOLMOD with sanitizers
+        run: |
+          mkdir -p benchmarks/cholmod/build_san
+          cd benchmarks/cholmod/build_san
+          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          make
+
+      - name: Build KLU with sanitizers
+        run: |
+          mkdir -p benchmarks/klu/build_san
+          cd benchmarks/klu/build_san
+          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          make
+
+      - name: Build UMFPACK with sanitizers
+        run: |
+          mkdir -p benchmarks/umfpack/build_san
+          cd benchmarks/umfpack/build_san
+          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          make
+
+      - name: Run CHOLMOD with sanitizers
+        run: |
+          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/cholmod/build_san/bench_cholmod 50 50
+
+      - name: Run KLU with sanitizers
+        run: |
+          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/klu/build_san/bench_klu
+
+      - name: Run UMFPACK with sanitizers
+        run: |
+          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/umfpack/build_san/bench_umfpack 50 50
+
   lint:
     name: Lint (clang-format)
     runs-on: ubuntu-24.04
