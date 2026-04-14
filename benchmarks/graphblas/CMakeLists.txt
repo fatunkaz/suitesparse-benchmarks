@@ -7,52 +7,38 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Detect system library path based on architecture
-if(NOT DEFINED SUITESPARSE_ROOT)
-    execute_process(
-        COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
-        OUTPUT_VARIABLE DEB_HOST_MULTIARCH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-    )
-    if(DEB_HOST_MULTIARCH)
-        set(SYS_LIB_PATH "/usr/lib/${DEB_HOST_MULTIARCH}")
-    else()
-        set(SYS_LIB_PATH "/usr/lib")
-    endif()
+set(SS_SEARCH_PATHS
+    /usr/include/suitesparse
+    /usr/include
+    /usr/local/include/suitesparse
+    /opt/homebrew/include/suitesparse
+    /opt/homebrew/opt/suite-sparse/include/suitesparse
+)
+set(SS_LIB_PATHS
+    /usr/lib/x86_64-linux-gnu
+    /usr/lib/aarch64-linux-gnu
+    /usr/lib/riscv64-linux-gnu
+    /usr/lib
+    /usr/local/lib
+    /opt/homebrew/lib
+    /opt/homebrew/opt/suite-sparse/lib
+)
+if(DEFINED SUITESPARSE_ROOT)
+    list(PREPEND SS_SEARCH_PATHS "${SUITESPARSE_ROOT}/include/suitesparse")
+    list(PREPEND SS_LIB_PATHS "${SUITESPARSE_ROOT}/lib")
 endif()
 
-find_path(GRAPHBLAS_INCLUDE_DIR GraphBLAS.h
-    PATHS
-        /usr/include/suitesparse
-        /usr/local/include/suitesparse
-        ${SUITESPARSE_ROOT}/include/suitesparse
-)
+find_path(GRAPHBLAS_INCLUDE_DIR GraphBLAS.h PATHS ${SS_SEARCH_PATHS})
+find_library(GRAPHBLAS_LIB NAMES graphblas PATHS ${SS_LIB_PATHS})
+find_library(CONFIG_LIB NAMES suitesparseconfig PATHS ${SS_LIB_PATHS})
 
-find_library(GRAPHBLAS_LIB NAMES graphblas
-    PATHS
-        ${SYS_LIB_PATH}
-        /usr/lib
-        /usr/local/lib
-        ${SUITESPARSE_ROOT}/lib
-)
-
-find_library(CONFIG_LIB NAMES suitesparseconfig
-    PATHS
-        ${SYS_LIB_PATH}
-        /usr/lib
-        /usr/local/lib
-        ${SUITESPARSE_ROOT}/lib
-)
-
-if(NOT GRAPHBLAS_INCLUDE_DIR OR NOT GRAPHBLAS_LIB OR NOT CONFIG_LIB)
-    message(FATAL_ERROR "GraphBLAS not found. Pass -DSUITESPARSE_ROOT=<path> or install libgraphblas-dev.")
+if(NOT GRAPHBLAS_INCLUDE_DIR OR NOT GRAPHBLAS_LIB)
+    message(FATAL_ERROR "GraphBLAS not found. Install libgraphblas-dev or suite-sparse via Homebrew.")
 endif()
 
 add_executable(bench_graphblas bench_graphblas.cpp)
 target_include_directories(bench_graphblas PRIVATE ${GRAPHBLAS_INCLUDE_DIR})
 target_link_libraries(bench_graphblas PRIVATE
-    ${GRAPHBLAS_LIB}
-    ${CONFIG_LIB}
+    ${GRAPHBLAS_LIB} ${CONFIG_LIB}
     m pthread
 )
