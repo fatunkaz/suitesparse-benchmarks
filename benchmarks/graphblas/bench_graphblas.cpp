@@ -11,11 +11,13 @@
  * Compatible with SuiteSparse:GraphBLAS >= 7.x and >= 10.x
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// On Linux with GraphBLAS 7.x the header is pure C and needs extern "C"
+// On macOS with GraphBLAS 10.x the header includes C++ headers itself
+#if defined(__APPLE__)
 #include <GraphBLAS.h>
-#ifdef __cplusplus
+#else
+extern "C" {
+#include <GraphBLAS.h>
 }
 #endif
 
