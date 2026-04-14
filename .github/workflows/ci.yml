@@ -49,6 +49,48 @@ jobs:
       - name: Run UMFPACK benchmark
         run: benchmarks/umfpack/build/bench_umfpack 50 50
 
+  bench-riscv64:
+    name: Benchmark on RISC-V (native)
+    runs-on: [self-hosted, riscv64]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libsuitesparse-dev
+
+      - name: Build CHOLMOD benchmark
+        run: |
+          mkdir -p benchmarks/cholmod/build_riscv64_native
+          cd benchmarks/cholmod/build_riscv64_native
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Build KLU benchmark
+        run: |
+          mkdir -p benchmarks/klu/build_riscv64_native
+          cd benchmarks/klu/build_riscv64_native
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Build UMFPACK benchmark
+        run: |
+          mkdir -p benchmarks/umfpack/build_riscv64_native
+          cd benchmarks/umfpack/build_riscv64_native
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Run CHOLMOD benchmark (native RISC-V)
+        run: benchmarks/cholmod/build_riscv64_native/bench_cholmod 50 50
+
+      - name: Run KLU benchmark (native RISC-V)
+        run: benchmarks/klu/build_riscv64_native/bench_klu
+
+      - name: Run UMFPACK benchmark (native RISC-V)
+        run: benchmarks/umfpack/build_riscv64_native/bench_umfpack 50 50
+
   lint:
     name: Lint (clang-format)
     runs-on: ubuntu-24.04
