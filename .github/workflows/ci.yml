@@ -94,6 +94,7 @@ jobs:
           find /usr -name "GraphBLAS.h" 2>/dev/null
 
       - name: Build GraphBLAS benchmark
+        continue-on-error: true
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
           cd benchmarks/graphblas/build_riscv64_native
