@@ -89,7 +89,8 @@ build() {
                 -DCONFIG_LIB="$CFG_LIB" > /dev/null ;;
     esac
 
-    make -j"$(nproc)" > /dev/null
+    NPROC=$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
+    make -j"$NPROC" > /dev/null
     cd "$REPO_ROOT"
 }
 
