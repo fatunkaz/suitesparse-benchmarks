@@ -121,8 +121,8 @@ jobs:
 
       - name: Run GraphBLAS benchmark (native RISC-V)
         run: |
-          benchmarks/graphblas/build_riscv64_native/bench_graphblas \
-            matrices/HEP-th-new/HEP-th-new.mtx | tee results/graphblas_riscv64_native.txt
+          ls matrices/HEP-th-new/ || echo "Matrix not found"
+          benchmarks/graphblas/build_riscv64_native/bench_graphblas             matrices/HEP-th-new/HEP-th-new.mtx | tee results/graphblas_riscv64_native.txt
 
       - name: Upload results
         uses: actions/upload-artifact@v4
