@@ -61,6 +61,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential libsuitesparse-dev
 
+      - name: Download test matrix
+        run: |
+          mkdir -p matrices
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" \
+            -o /tmp/HEP-th-new.tar.gz
+          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
+
       - name: Build CHOLMOD benchmark
         run: |
           mkdir -p benchmarks/cholmod/build_riscv64_native
@@ -82,25 +89,17 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
-      - name: Download test matrix
-        run: |
-          mkdir -p matrices/HEP-th-new
-          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" -o /tmp/HEP-th-new.tar.gz
-          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
-
-      - name: Find GraphBLAS library
-        run: |
-          find /usr -name "libgraphblas*" 2>/dev/null
-          find /usr -name "GraphBLAS.h" 2>/dev/null
-
       - name: Build GraphBLAS benchmark
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
-          g++ -O3 -DNDEBUG -std=c++11             -I/usr/include             -I/usr/include/suitesparse             benchmarks/graphblas/bench_graphblas.cpp             -o benchmarks/graphblas/build_riscv64_native/bench_graphblas             -L/usr/lib/riscv64-linux-gnu             -lgraphblas -lsuitesparseconfig -lm -lpthread
-
-      - name: Run GraphBLAS benchmark (native RISC-V)
-        run: |
-          benchmarks/graphblas/build_riscv64_native/bench_graphblas             matrices/HEP-th-new/HEP-th-new.mtx | tee results/graphblas_riscv64_native.txt
+          g++ -O3 -DNDEBUG -std=c++11 \
+            -I/usr/include \
+            -I/usr/include/suitesparse \
+            benchmarks/graphblas/bench_graphblas.cpp \
+            -o benchmarks/graphblas/build_riscv64_native/bench_graphblas \
+            /usr/lib/riscv64-linux-gnu/libgraphblas.so.7 \
+            /usr/lib/riscv64-linux-gnu/libsuitesparseconfig.so \
+            -lm -lpthread
 
       - name: Run CHOLMOD benchmark (native RISC-V)
         run: |
@@ -112,6 +111,11 @@ jobs:
 
       - name: Run UMFPACK benchmark (native RISC-V)
         run: benchmarks/umfpack/build_riscv64_native/bench_umfpack 100 100 | tee results/umfpack_riscv64_native.txt
+
+      - name: Run GraphBLAS benchmark (native RISC-V)
+        run: |
+          benchmarks/graphblas/build_riscv64_native/bench_graphblas \
+            matrices/HEP-th-new/HEP-th-new.mtx | tee results/graphblas_riscv64_native.txt
 
       - name: Upload results
         uses: actions/upload-artifact@v4
