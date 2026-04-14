@@ -82,6 +82,23 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
+      - name: Download test matrix
+        run: |
+          mkdir -p matrices/HEP-th-new
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" -o /tmp/HEP-th-new.tar.gz
+          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
+
+      - name: Build GraphBLAS benchmark
+        run: |
+          mkdir -p benchmarks/graphblas/build_riscv64_native
+          cd benchmarks/graphblas/build_riscv64_native
+          cmake .. -DCMAKE_BUILD_TYPE=Release             -DGRAPHBLAS_INCLUDE_DIR=/usr/include/suitesparse             -DGRAPHBLAS_LIB=/usr/lib/riscv64-linux-gnu/libgraphblas.so             -DCONFIG_LIB=/usr/lib/riscv64-linux-gnu/libsuitesparseconfig.so
+          make
+
+      - name: Run GraphBLAS benchmark (native RISC-V)
+        run: |
+          benchmarks/graphblas/build_riscv64_native/bench_graphblas             matrices/HEP-th-new/HEP-th-new.mtx | tee results/graphblas_riscv64_native.txt
+
       - name: Run CHOLMOD benchmark (native RISC-V)
         run: |
           mkdir -p results
