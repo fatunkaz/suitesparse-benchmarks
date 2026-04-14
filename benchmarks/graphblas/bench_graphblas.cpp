@@ -22,20 +22,18 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <sys/resource.h>
+#include <time.h>
 
 #define N_ITER 10
 
-static double now(void)
-{
+static double now(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec * 1e-9;
 }
 
-static long peak_rss_kb(void)
-{
+static long peak_rss_kb(void) {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
 #ifdef __APPLE__
@@ -54,8 +52,7 @@ static long peak_rss_kb(void)
  * internally. For symmetric matrices, both (i,j) and (j,i) entries are
  * inserted.
  */
-static GrB_Matrix read_mtx(const char *filename)
-{
+static GrB_Matrix read_mtx(const char *filename) {
     FILE *f = fopen(filename, "r");
     if (!f) {
         fprintf(stderr, "Cannot open %s\n", filename);
@@ -108,8 +105,7 @@ static GrB_Matrix read_mtx(const char *filename)
 /**
  * @brief Main benchmark entry point.
  */
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     const char *mtx_file = "../../matrices/HEP-th-new/HEP-th-new.mtx";
     if (argc >= 2)
         mtx_file = argv[1];
@@ -134,9 +130,7 @@ int main(int argc, char **argv)
     GrB_Matrix_ncols(&ncols, A);
     GrB_Matrix_nvals(&nnz, A);
 
-    printf("Matrix: %llu x %llu, nnz: %llu\n",
-           (unsigned long long)nrows,
-           (unsigned long long)ncols,
+    printf("Matrix: %llu x %llu, nnz: %llu\n", (unsigned long long)nrows, (unsigned long long)ncols,
            (unsigned long long)nnz);
     printf("Load time: %.6f s\n", t_load);
 
@@ -162,8 +156,8 @@ int main(int argc, char **argv)
 
     long rss = peak_rss_kb();
 
-    printf("SpGEMM A*A (%d iters): total %.6f s, avg %.6f s\n",
-           N_ITER, t_spgemm_total, t_spgemm_avg);
+    printf("SpGEMM A*A (%d iters): total %.6f s, avg %.6f s\n", N_ITER, t_spgemm_total,
+           t_spgemm_avg);
     printf("nnz(C) = %llu\n", (unsigned long long)nnz_C);
     printf("Peak RSS: %ld KB\n", rss);
     printf("--- Summary ---\n");
