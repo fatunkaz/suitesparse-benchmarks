@@ -89,6 +89,11 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
 
+      - name: Check GraphBLAS version
+        run: |
+          dpkg -l | grep graphblas
+          nm -D /usr/lib/riscv64-linux-gnu/libgraphblas.so.7 | grep GrB_init | head -5
+
       - name: Build GraphBLAS benchmark
         run: |
           mkdir -p benchmarks/graphblas/build_riscv64_native
