@@ -49,6 +49,21 @@ jobs:
       - name: Run UMFPACK benchmark
         run: benchmarks/umfpack/build/bench_umfpack 50 50
 
+      - name: Download test matrix
+        run: |
+          mkdir -p matrices
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz"             -o /tmp/HEP-th-new.tar.gz
+          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
+
+      - name: Build GraphBLAS benchmark (x86-64)
+        run: |
+          mkdir -p benchmarks/graphblas/build
+          g++ -O3 -DNDEBUG -std=c++11             -I/usr/include             -I/usr/include/suitesparse             benchmarks/graphblas/bench_graphblas.cpp             -o benchmarks/graphblas/build/bench_graphblas             /usr/lib/x86_64-linux-gnu/libgraphblas.so.7             /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so             -lm -lpthread
+
+      - name: Run GraphBLAS benchmark (x86-64)
+        run: |
+          benchmarks/graphblas/build/bench_graphblas             matrices/HEP-th-new/HEP-th-new.mtx
+
   bench-riscv64:
     name: Benchmark on RISC-V (native)
     runs-on: ubuntu-24.04-riscv
