@@ -7,6 +7,21 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+# Detect system library path based on architecture
+if(NOT DEFINED SUITESPARSE_ROOT)
+    execute_process(
+        COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
+        OUTPUT_VARIABLE DEB_HOST_MULTIARCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(DEB_HOST_MULTIARCH)
+        set(SYS_LIB_PATH "/usr/lib/${DEB_HOST_MULTIARCH}")
+    else()
+        set(SYS_LIB_PATH "/usr/lib")
+    endif()
+endif()
+
 find_path(GRAPHBLAS_INCLUDE_DIR GraphBLAS.h
     PATHS
         /usr/include/suitesparse
@@ -16,7 +31,7 @@ find_path(GRAPHBLAS_INCLUDE_DIR GraphBLAS.h
 
 find_library(GRAPHBLAS_LIB NAMES graphblas
     PATHS
-        /usr/lib/x86_64-linux-gnu
+        ${SYS_LIB_PATH}
         /usr/lib
         /usr/local/lib
         ${SUITESPARSE_ROOT}/lib
@@ -24,11 +39,15 @@ find_library(GRAPHBLAS_LIB NAMES graphblas
 
 find_library(CONFIG_LIB NAMES suitesparseconfig
     PATHS
-        /usr/lib/x86_64-linux-gnu
+        ${SYS_LIB_PATH}
         /usr/lib
         /usr/local/lib
         ${SUITESPARSE_ROOT}/lib
 )
+
+if(NOT GRAPHBLAS_INCLUDE_DIR OR NOT GRAPHBLAS_LIB OR NOT CONFIG_LIB)
+    message(FATAL_ERROR "GraphBLAS not found. Pass -DSUITESPARSE_ROOT=<path> or install libgraphblas-dev.")
+endif()
 
 add_executable(bench_graphblas bench_graphblas.cpp)
 target_include_directories(bench_graphblas PRIVATE ${GRAPHBLAS_INCLUDE_DIR})
