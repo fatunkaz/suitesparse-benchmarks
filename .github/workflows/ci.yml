@@ -88,12 +88,12 @@ jobs:
       - name: Download test matrix
         run: |
           mkdir -p matrices
-          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz"             -o /tmp/HEP-th-new.tar.gz
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" \
+            -o /tmp/HEP-th-new.tar.gz
           tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
 
       - name: Run benchmarks via run_riscv64.sh
-        run: |
-          ./scripts/run_riscv64.sh
+        run: ./scripts/run_riscv64.sh
 
       - name: Upload results
         uses: actions/upload-artifact@v4
@@ -117,34 +117,69 @@ jobs:
         run: |
           mkdir -p benchmarks/cholmod/build_san
           cd benchmarks/cholmod/build_san
-          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake .. -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
           make
 
       - name: Build KLU with sanitizers
         run: |
           mkdir -p benchmarks/klu/build_san
           cd benchmarks/klu/build_san
-          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake .. -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
           make
 
       - name: Build UMFPACK with sanitizers
         run: |
           mkdir -p benchmarks/umfpack/build_san
           cd benchmarks/umfpack/build_san
-          cmake .. -DCMAKE_BUILD_TYPE=Debug             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake .. -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
           make
+
+      - name: Build GraphBLAS with sanitizers
+        run: |
+          mkdir -p benchmarks/graphblas/build_san
+          g++ -O1 -g -std=c++11 \
+            -fsanitize=address,undefined -fno-omit-frame-pointer \
+            -I/usr/include -I/usr/include/suitesparse \
+            benchmarks/graphblas/bench_graphblas.cpp \
+            -o benchmarks/graphblas/build_san/bench_graphblas \
+            /usr/lib/x86_64-linux-gnu/libgraphblas.so.7 \
+            /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so \
+            -lm -lpthread
+
+      - name: Download test matrix
+        run: |
+          mkdir -p matrices
+          curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" \
+            -o /tmp/HEP-th-new.tar.gz
+          tar -xzf /tmp/HEP-th-new.tar.gz -C matrices/
 
       - name: Run CHOLMOD with sanitizers
         run: |
-          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/cholmod/build_san/bench_cholmod 50 50
+          ASAN_OPTIONS=detect_leaks=1 \
+          UBSAN_OPTIONS=print_stacktrace=1 \
+          benchmarks/cholmod/build_san/bench_cholmod 50 50
 
       - name: Run KLU with sanitizers
         run: |
-          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/klu/build_san/bench_klu
+          ASAN_OPTIONS=detect_leaks=1 \
+          UBSAN_OPTIONS=print_stacktrace=1 \
+          benchmarks/klu/build_san/bench_klu
 
       - name: Run UMFPACK with sanitizers
         run: |
-          ASAN_OPTIONS=detect_leaks=1           UBSAN_OPTIONS=print_stacktrace=1           benchmarks/umfpack/build_san/bench_umfpack 50 50
+          ASAN_OPTIONS=detect_leaks=1 \
+          UBSAN_OPTIONS=print_stacktrace=1 \
+          benchmarks/umfpack/build_san/bench_umfpack 50 50
+
+      - name: Run GraphBLAS with sanitizers
+        run: |
+          ASAN_OPTIONS=detect_leaks=0 \
+          UBSAN_OPTIONS=print_stacktrace=1 \
+          benchmarks/graphblas/build_san/bench_graphblas \
+            matrices/HEP-th-new/HEP-th-new.mtx
 
   lint:
     name: Lint (clang-format)
