@@ -53,6 +53,7 @@ The following tools must be available regardless of the target architecture:
 | git | any | Cloning SuiteSparse source |
 | curl | any | Downloading test matrix |
 | tar | any | Extracting test matrix archive| 
+
 Install on Ubuntu/Debian:
 
 ```bash
