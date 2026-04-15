@@ -59,14 +59,9 @@ jobs:
       - name: Build GraphBLAS benchmark (x86-64)
         run: |
           mkdir -p benchmarks/graphblas/build
-          g++ -O3 -DNDEBUG -std=c++11 \
-            -I/usr/include \
-            -I/usr/include/suitesparse \
-            benchmarks/graphblas/bench_graphblas.cpp \
-            -o benchmarks/graphblas/build/bench_graphblas \
-            /usr/lib/x86_64-linux-gnu/libgraphblas.so.7 \
-            /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so \
-            -lm -lpthread
+          cd benchmarks/graphblas/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
 
       - name: Run GraphBLAS benchmark (x86-64)
         run: |
