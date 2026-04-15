@@ -177,7 +177,8 @@ int main(int argc, char **argv) {
     printf("peak RSS: %ld KB\n", rss);
     printf("spgemm:   %.2f MNOPS/s\n", mnops_spgemm);
     printf("bandwidth: %.2f GB/s (SpGEMM)\n", bandwidth_spgemm_gbs);
-    double ai_spgemm = (bandwidth_spgemm_gbs > 0.0) ? (mnops_spgemm / 1000.0) / bandwidth_spgemm_gbs : 0.0;
+    double ai_spgemm =
+        (bandwidth_spgemm_gbs > 0.0) ? (mnops_spgemm / 1000.0) / bandwidth_spgemm_gbs : 0.0;
     printf("arith. intensity: %.4f FLOP/byte (SpGEMM)\n", ai_spgemm);
 
     GrB_Matrix_free(&A);
