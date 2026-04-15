@@ -216,8 +216,7 @@ int main(void) {
 
     /* Memory bandwidth estimate for refactorization */
     double bytes_refactor = (double)(2 * (lnz + unz)) * sizeof(double);
-    double bandwidth_refactor_gbs =
-        (t_refactor_avg > 0.0) ? (bytes_refactor / t_refactor_avg) / 1e9 : 0.0;
+    double bandwidth_refactor_gbs = (t_refactor_avg > 0.0) ? (bytes_refactor / t_refactor_avg) / 1e9 : 0.0;
 
     printf("--- Summary ---\n");
     printf("symbolic:  %f s\n", t_symbolic);
@@ -230,8 +229,7 @@ int main(void) {
     printf("refactor:  %.2f MFLOP/s\n", mflops_refactor);
     printf("solve:     %.2f MFLOP/s\n", mflops_solve);
     printf("bandwidth: %.2f GB/s (refactorization)\n", bandwidth_refactor_gbs);
-    double ai_refactor =
-        (bandwidth_refactor_gbs > 0.0) ? (mflops_refactor / 1000.0) / bandwidth_refactor_gbs : 0.0;
+    double ai_refactor = (bandwidth_refactor_gbs > 0.0) ? (mflops_refactor / 1000.0) / bandwidth_refactor_gbs : 0.0;
     printf("arith. intensity: %.4f FLOP/byte (refactor)\n", ai_refactor);
 
     klu_free_numeric(&Numeric, &common);
