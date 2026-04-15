@@ -52,11 +52,11 @@ The following tools must be available regardless of the target architecture:
 | make | any | Build automation |
 | git | any | Cloning SuiteSparse source |
 | curl | any | Downloading test matrix |
-
+| tar | any | Extracting test matrix archive| 
 Install on Ubuntu/Debian:
 
 ```bash
-sudo apt install -y build-essential cmake git curl
+sudo apt-get install -y build-essential cmake git curl tar
 ```
 
 Install on macOS:
@@ -85,29 +85,10 @@ cd suitesparse-benchmarks
 ### Step 1 — Install packages
 
 ```bash
-sudo apt install -y build-essential cmake libsuitesparse-dev
+sudo apt-get install -y libsuitesparse-dev
 ```
 
-### Step 2 — Build GraphBLAS 10.x
-
-The system package provides GraphBLAS 7.x. The benchmark requires 10.x
-for optimal performance. Build it once and install to `$HOME/x86-libs`:
-
-```bash
-git clone https://github.com/DrTimothyAldenDavis/SuiteSparse.git
-cd SuiteSparse && mkdir build_x86 && cd build_x86
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=$HOME/x86-libs \
-    -DSUITESPARSE_ENABLE_PROJECTS="graphblas" \
-    -DSUITESPARSE_ENABLE_CUDA=OFF
-make -j$(nproc) GraphBLAS && make install
-cp /usr/lib/x86_64-linux-gnu/libsuitesparseconfig.so* $HOME/x86-libs/lib/
-cp /usr/include/suitesparse/SuiteSparse_config.h \
-    $HOME/x86-libs/include/suitesparse/
-cd ../..
-```
-
-### Step 3 — Download test matrix
+### Step 2 — Download test matrix
 
 ```bash
 cd matrices
@@ -116,7 +97,7 @@ tar -xzf HEP-th-new.tar.gz && rm HEP-th-new.tar.gz
 cd ..
 ```
 
-### Step 4 — Run
+### Step 3 — Run
 
 ```bash
 ./scripts/run_x86_64.sh
@@ -135,23 +116,10 @@ The script automatically detects whether it runs on Linux or macOS.
 #### Step 1 — Install packages
 
 ```bash
-sudo apt install -y build-essential cmake libsuitesparse-dev
+sudo apt-get install -y libsuitesparse-dev
 ```
 
-#### Step 2 — Build GraphBLAS 10.x
-
-```bash
-git clone https://github.com/DrTimothyAldenDavis/SuiteSparse.git
-cd SuiteSparse && mkdir build_arm64 && cd build_arm64
-cmake .. -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=$HOME/arm64-libs \
-    -DSUITESPARSE_ENABLE_PROJECTS="graphblas" \
-    -DSUITESPARSE_ENABLE_CUDA=OFF
-make -j$(nproc) GraphBLAS && make install
-cd ../..
-```
-
-#### Step 3 — Download test matrix
+#### Step 2 — Download test matrix
 
 ```bash
 cd matrices
@@ -161,7 +129,7 @@ tar -xzf HEP-th-new.tar.gz && rm HEP-th-new.tar.gz
 cd ..
 ```
 
-#### Step 4 — Run
+#### Step 3 — Run
 
 ```bash
 ./scripts/run_aarch64.sh
@@ -172,7 +140,7 @@ cd ..
 #### Step 1 — Install via Homebrew
 
 ```bash
-brew install suite-sparse cmake
+brew install suite-sparse 
 ```
 
 #### Step 2 — Download test matrix
@@ -202,7 +170,7 @@ Tested on Scaleway EM-RV1 (T-Head C910, Ubuntu 24.04).
 ### Step 1 — Install packages
 
 ```bash
-sudo apt install -y build-essential cmake libsuitesparse-dev
+sudo apt install -y libsuitesparse-dev
 ```
 
 The system package provides all required SuiteSparse components including
@@ -230,6 +198,27 @@ cd ..
 
 Results are saved to `results/` as plain text files:
 `<benchmark>_<arch>.txt` (e.g. `cholmod_x86_64.txt`, `klu_riscv64.txt`).
+
+### Example result cholmod_x86_64
+
+```
+=== CHOLMOD benchmark (Ceres scenario) ===
+Grid: 316 x 316, matrix size: 99856 x 99856
+nnz (lower triangle): 298936
+Symbolic analysis:    0.036530 s
+Numeric factorization (20 iters): total 6.432499 s, avg 0.321625 s
+Fill-in: nnz(L)=3282021, nnz(A_full)=498016, ratio=6.59
+Solve:                0.015410 s
+Residual ||Ax-b||/||b||: 4.22e-16
+Peak RSS:             88128 KB
+--- Summary ---
+symbolic:  0.036530 s
+numeric:   0.321625 s (avg over 20 iters)
+solve:     0.015410 s
+fill-in:   6.59
+residual:  4.22e-16
+peak RSS:  88128 KB
+```
 
 ## Test matrix
 
