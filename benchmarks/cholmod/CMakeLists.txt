@@ -2,7 +2,16 @@ cmake_minimum_required(VERSION 3.16)
 project(bench_cholmod CXX)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+# Platform-specific optimization flags
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+    # T-Head C910: RV64GCV — enable vector extension explicitly
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=rv64gcv -mtune=thead-c910")
+else()
+    # x86-64 and AArch64: use native detection
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native -mtune=native")
+endif()
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
