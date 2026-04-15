@@ -303,7 +303,8 @@ int main(int argc, char **argv) {
 
     /* Memory bandwidth estimate for numeric factorization */
     double bytes_numeric = (double)(2 * (lnz + unz) + nnz) * sizeof(double);
-    double bandwidth_numeric_gbs = (t_numeric_avg > 0.0) ? (bytes_numeric / t_numeric_avg) / 1e9 : 0.0;
+    double bandwidth_numeric_gbs =
+        (t_numeric_avg > 0.0) ? (bytes_numeric / t_numeric_avg) / 1e9 : 0.0;
 
     printf("--- Summary ---\n");
     printf("symbolic:  %.6f s\n", t_symbolic);
@@ -315,7 +316,8 @@ int main(int argc, char **argv) {
     printf("numeric:   %.2f MFLOP/s\n", mflops_numeric);
     printf("solve:     %.2f MFLOP/s\n", mflops_solve);
     printf("bandwidth: %.2f GB/s (numeric factorization)\n", bandwidth_numeric_gbs);
-    double ai_numeric = (bandwidth_numeric_gbs > 0.0) ? (mflops_numeric / 1000.0) / bandwidth_numeric_gbs : 0.0;
+    double ai_numeric =
+        (bandwidth_numeric_gbs > 0.0) ? (mflops_numeric / 1000.0) / bandwidth_numeric_gbs : 0.0;
     printf("arith. intensity: %.4f FLOP/byte (numeric)\n", ai_numeric);
 
     umfpack_di_free_symbolic(&Symbolic);
