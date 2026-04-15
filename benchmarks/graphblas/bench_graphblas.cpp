@@ -162,11 +162,23 @@ int main(int argc, char **argv) {
            t_spgemm_avg);
     printf("nnz(C) = %llu\n", (unsigned long long)nnz_C);
     printf("Peak RSS: %ld KB\n", rss);
+    /* --- Performance metrics --- */
+    /* SpGEMM throughput: nnz(C) output nonzeros per second */
+    double mnops_spgemm = (t_spgemm_avg > 0.0) ? ((double)nnz_C / t_spgemm_avg) / 1e6 : 0.0;
+
+    /* Memory bandwidth estimate: read A twice + write C */
+    double bytes_spgemm = (2.0 * (double)nnz + (double)nnz_C) * sizeof(double);
+    double bandwidth_spgemm_gbs = (t_spgemm_avg > 0.0) ? (bytes_spgemm / t_spgemm_avg) / 1e9 : 0.0;
+
     printf("--- Summary ---\n");
     printf("load:     %.6f s\n", t_load);
     printf("spgemm:   %.6f s (avg over %d iters)\n", t_spgemm_avg, N_ITER);
     printf("nnz(C):   %llu\n", (unsigned long long)nnz_C);
     printf("peak RSS: %ld KB\n", rss);
+    printf("spgemm:   %.2f MNOPS/s\n", mnops_spgemm);
+    printf("bandwidth: %.2f GB/s (SpGEMM)\n", bandwidth_spgemm_gbs);
+    double ai_spgemm = (bandwidth_spgemm_gbs > 0.0) ? (mnops_spgemm / 1000.0) / bandwidth_spgemm_gbs : 0.0;
+    printf("arith. intensity: %.4f FLOP/byte (SpGEMM)\n", ai_spgemm);
 
     GrB_Matrix_free(&A);
     GrB_Matrix_free(&C);

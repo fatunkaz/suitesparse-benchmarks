@@ -233,6 +233,20 @@ int main(int argc, char **argv) {
     long rss = peak_rss_kb();
     printf("Peak RSS:             %ld KB\n", rss);
 
+    /* --- Performance metrics --- */
+    /* Cholesky factorization: approx 2*nnz(L) floating-point operations */
+    double flop_numeric = 2.0 * (double)nnz_L;
+    double mflops_numeric = (t_numeric_avg > 0.0) ? (flop_numeric / t_numeric_avg) / 1e6 : 0.0;
+
+    /* Triangular solve: approx 2*nnz(L) floating-point operations */
+    double flop_solve = 2.0 * (double)nnz_L;
+    double mflops_solve = (t_solve > 0.0) ? (flop_solve / t_solve) / 1e6 : 0.0;
+
+    /* Memory bandwidth estimate for numeric factorization:
+     * reads L (nnz_L doubles) + reads A (nnz_A doubles) + writes L (nnz_L doubles) */
+    double bytes_numeric = (double)(2 * nnz_L + nnz_A) * sizeof(double);
+    double bandwidth_numeric_gbs = (t_numeric_avg > 0.0) ? (bytes_numeric / t_numeric_avg) / 1e9 : 0.0;
+
     printf("--- Summary ---\n");
     printf("symbolic:  %.6f s\n", t_symbolic);
     printf("numeric:   %.6f s (avg over %d iters)\n", t_numeric_avg, N_ITER);
@@ -240,6 +254,11 @@ int main(int argc, char **argv) {
     printf("fill-in:   %.2f\n", fill_ratio);
     printf("residual:  %.2e\n", rel_res);
     printf("peak RSS:  %ld KB\n", rss);
+    printf("numeric:   %.2f MFLOP/s\n", mflops_numeric);
+    printf("solve:     %.2f MFLOP/s\n", mflops_solve);
+    printf("bandwidth: %.2f GB/s (numeric factorization)\n", bandwidth_numeric_gbs);
+    double ai_numeric = (bandwidth_numeric_gbs > 0.0) ? (mflops_numeric / 1000.0) / bandwidth_numeric_gbs : 0.0;
+    printf("arith. intensity: %.4f FLOP/byte (numeric)\n", ai_numeric);
 
     cholmod_free_sparse(&A, &cc);
     cholmod_free_factor(&L, &cc);

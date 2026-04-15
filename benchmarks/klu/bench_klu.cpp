@@ -205,6 +205,19 @@ int main(void) {
     printf("Fill-in: lnz=%ld, unz=%ld, ratio=%.2f\n", lnz, unz, fill_ratio);
     printf("Residual ||Ax-b||/||b||:     %.2e\n", rel_res);
     printf("Peak RSS:                    %ld KB\n", rss);
+    /* --- Performance metrics --- */
+    /* LU refactorization: approx 2*(lnz+unz) floating-point operations */
+    double flop_refactor = 2.0 * (double)(lnz + unz);
+    double mflops_refactor = (t_refactor_avg > 0.0) ? (flop_refactor / t_refactor_avg) / 1e6 : 0.0;
+
+    /* Triangular solve: approx 2*(lnz+unz) floating-point operations */
+    double flop_solve = 2.0 * (double)(lnz + unz);
+    double mflops_solve = (t_solve > 0.0) ? (flop_solve / t_solve) / 1e6 : 0.0;
+
+    /* Memory bandwidth estimate for refactorization */
+    double bytes_refactor = (double)(2 * (lnz + unz)) * sizeof(double);
+    double bandwidth_refactor_gbs = (t_refactor_avg > 0.0) ? (bytes_refactor / t_refactor_avg) / 1e9 : 0.0;
+
     printf("--- Summary ---\n");
     printf("symbolic:  %f s\n", t_symbolic);
     printf("factor:    %f s\n", t_factor_first);
@@ -213,6 +226,11 @@ int main(void) {
     printf("fill-in:   %.2f\n", fill_ratio);
     printf("residual:  %.2e\n", rel_res);
     printf("peak RSS:  %ld KB\n", rss);
+    printf("refactor:  %.2f MFLOP/s\n", mflops_refactor);
+    printf("solve:     %.2f MFLOP/s\n", mflops_solve);
+    printf("bandwidth: %.2f GB/s (refactorization)\n", bandwidth_refactor_gbs);
+    double ai_refactor = (bandwidth_refactor_gbs > 0.0) ? (mflops_refactor / 1000.0) / bandwidth_refactor_gbs : 0.0;
+    printf("arith. intensity: %.4f FLOP/byte (refactor)\n", ai_refactor);
 
     klu_free_numeric(&Numeric, &common);
     klu_free_symbolic(&Symbolic, &common);
