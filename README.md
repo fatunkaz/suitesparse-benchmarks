@@ -93,7 +93,8 @@ sudo apt-get install -y libsuitesparse-dev
 
 ```bash
 cd matrices
-wget "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz"
+curl -L "https://suitesparse-collection-website.herokuapp.com/MM/Pajek/HEP-th-new.tar.gz" \
+    -o HEP-th-new.tar.gz
 tar -xzf HEP-th-new.tar.gz && rm HEP-th-new.tar.gz
 cd ..
 ```
