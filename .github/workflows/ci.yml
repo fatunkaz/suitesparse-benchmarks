@@ -92,13 +92,14 @@ jobs:
 
       - name: Build all benchmarks with RV64GCV vector extension
         run: |
+          REPO=$GITHUB_WORKSPACE
           for bench in cholmod klu umfpack graphblas; do
-            mkdir -p benchmarks/$bench/build_riscv64_vec
-            cd benchmarks/$bench/build_riscv64_vec
-            cmake .. -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
-            make -j$(nproc)
-            cd /home/runner/_work/suitesparse-benchmarks/  # Changed: work -> _work
+            mkdir -p $REPO/benchmarks/$bench/build_riscv64_vec
+            cmake -S $REPO/benchmarks/$bench \
+                  -B $REPO/benchmarks/$bench/build_riscv64_vec \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
+            make -C $REPO/benchmarks/$bench/build_riscv64_vec -j$(nproc)
           done
 
       - name: Run benchmarks with RV64GCV and compare
