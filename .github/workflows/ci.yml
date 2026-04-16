@@ -90,22 +90,6 @@ jobs:
       - name: Run benchmarks via run_riscv64.sh
         run: ./scripts/run_riscv64.sh
 
-      - name: Build CHOLMOD with RV64GCV vector extension
-        run: |
-          mkdir -p benchmarks/cholmod/build_riscv64_vec
-          cd benchmarks/cholmod/build_riscv64_vec
-          cmake .. -DCMAKE_BUILD_TYPE=Release             -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
-          make -j$(nproc)
-
-      - name: Run CHOLMOD with RV64GCV (vectorized)
-        run: |
-          benchmarks/cholmod/build_riscv64_vec/bench_cholmod 316 316             | tee results/cholmod_riscv64_vec.txt
-          echo "--- Comparison ---"
-          echo "Without RV64GCV:"
-          grep "numeric:\|bandwidth:\|arith" results/cholmod_riscv64.txt || true
-          echo "With RV64GCV:"
-          grep "numeric:\|bandwidth:\|arith" results/cholmod_riscv64_vec.txt || true
-
       - name: Build all benchmarks with RV64GCV vector extension
         run: |
           for bench in cholmod klu umfpack graphblas; do
@@ -114,7 +98,7 @@ jobs:
             cmake .. -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
             make -j$(nproc)
-            cd /home/runner/work/suitesparse-benchmarks/suitesparse-benchmarks
+            cd /home/runner/work/suitesparse-benchmarks/
           done
 
       - name: Run benchmarks with RV64GCV and compare
