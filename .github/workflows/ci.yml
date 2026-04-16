@@ -90,45 +90,6 @@ jobs:
       - name: Run benchmarks via run_riscv64.sh
         run: ./scripts/run_riscv64.sh
 
-      - name: Build all benchmarks with RV64GCV vector extension
-        run: |
-          REPO=$GITHUB_WORKSPACE
-          for bench in cholmod klu umfpack graphblas; do
-            mkdir -p $REPO/benchmarks/$bench/build_riscv64_vec
-            cmake -S $REPO/benchmarks/$bench \
-                  -B $REPO/benchmarks/$bench/build_riscv64_vec \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
-            make -C $REPO/benchmarks/$bench/build_riscv64_vec -j$(nproc)
-          done
-
-      - name: Run benchmarks with RV64GCV and compare
-        run: |
-          echo "=== CHOLMOD ==="
-          benchmarks/cholmod/build_riscv64_vec/bench_cholmod 316 316 \
-            | tee results/cholmod_riscv64_vec.txt
-          echo "Without RV64GCV:"; grep "numeric:\|bandwidth:\|arith" results/cholmod_riscv64.txt || true
-          echo "With RV64GCV:";    grep "numeric:\|bandwidth:\|arith" results/cholmod_riscv64_vec.txt || true
-
-          echo "=== KLU ==="
-          benchmarks/klu/build_riscv64_vec/bench_klu \
-            | tee results/klu_riscv64_vec.txt
-          echo "Without RV64GCV:"; grep "refactor:\|bandwidth:\|arith" results/klu_riscv64.txt || true
-          echo "With RV64GCV:";    grep "refactor:\|bandwidth:\|arith" results/klu_riscv64_vec.txt || true
-
-          echo "=== UMFPACK ==="
-          benchmarks/umfpack/build_riscv64_vec/bench_umfpack 100 100 \
-            | tee results/umfpack_riscv64_vec.txt
-          echo "Without RV64GCV:"; grep "numeric:\|bandwidth:\|arith" results/umfpack_riscv64.txt || true
-          echo "With RV64GCV:";    grep "numeric:\|bandwidth:\|arith" results/umfpack_riscv64_vec.txt || true
-
-          echo "=== GraphBLAS ==="
-          benchmarks/graphblas/build_riscv64_vec/bench_graphblas \
-            matrices/HEP-th-new/HEP-th-new.mtx \
-            | tee results/graphblas_riscv64_vec.txt
-          echo "Without RV64GCV:"; grep "spgemm:\|bandwidth:\|arith" results/graphblas_riscv64.txt || true
-          echo "With RV64GCV:";    grep "spgemm:\|bandwidth:\|arith" results/graphblas_riscv64_vec.txt || true
-
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
