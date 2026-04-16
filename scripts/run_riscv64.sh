@@ -64,7 +64,8 @@ build() {
                 -I/usr/include -I/usr/include/suitesparse \
                 "$REPO_ROOT/benchmarks/graphblas/bench_graphblas.cpp" \
                 -o bench_graphblas \
-                "$GB_LIB" "$CFG_LIB" -lm -lpthread ;;
+                -L$(dirname "$GB_LIB") -L$(dirname "$CFG_LIB") \
+                -lgraphblas -lsuitesparseconfig -lm -lpthread ;;
     esac
 
     [ "$bench" != "graphblas" ] && make -j"$(nproc)" > /dev/null
