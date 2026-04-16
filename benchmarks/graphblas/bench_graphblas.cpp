@@ -163,8 +163,9 @@ int main(int argc, char **argv) {
     printf("nnz(C) = %llu\n", (unsigned long long)nnz_C);
     printf("Peak RSS: %ld KB\n", rss);
     /* --- Performance metrics --- */
-    /* SpGEMM throughput: nnz(C) output nonzeros per second */
-    double mnops_spgemm = (t_spgemm_avg > 0.0) ? ((double)nnz_C / t_spgemm_avg) / 1e6 : 0.0;
+    /* SpGEMM MFLOP/s: upper bound estimate 2*nnz(A)^2/n */
+    double flop_spgemm = 2.0 * (double)nnz * (double)nnz / (double)nrows;
+    double mnops_spgemm = (t_spgemm_avg > 0.0) ? (flop_spgemm / t_spgemm_avg) / 1e6 : 0.0;
 
     /* Memory bandwidth estimate: read A twice + write C */
     double bytes_spgemm = (2.0 * (double)nnz + (double)nnz_C) * sizeof(double);
@@ -175,7 +176,7 @@ int main(int argc, char **argv) {
     printf("spgemm:   %.6f s (avg over %d iters)\n", t_spgemm_avg, N_ITER);
     printf("nnz(C):   %llu\n", (unsigned long long)nnz_C);
     printf("peak RSS: %ld KB\n", rss);
-    printf("spgemm:   %.2f MNOPS/s\n", mnops_spgemm);
+    printf("spgemm:   %.2f MFLOP/s\n", mnops_spgemm);
     printf("bandwidth: %.2f GB/s (SpGEMM)\n", bandwidth_spgemm_gbs);
     double ai_spgemm =
         (bandwidth_spgemm_gbs > 0.0) ? (mnops_spgemm / 1000.0) / bandwidth_spgemm_gbs : 0.0;
