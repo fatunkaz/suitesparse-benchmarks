@@ -207,19 +207,23 @@ Results are saved to `results/` as plain text files:
 === CHOLMOD benchmark (Ceres scenario) ===
 Grid: 316 x 316, matrix size: 99856 x 99856
 nnz (lower triangle): 298936
-Symbolic analysis:    0.036530 s
-Numeric factorization (20 iters): total 6.432499 s, avg 0.321625 s
+Symbolic analysis:    0.033607 s
+Numeric factorization (20 iters): total 6.495540 s, avg 0.324777 s
 Fill-in: nnz(L)=3282021, nnz(A_full)=498016, ratio=6.59
-Solve:                0.015410 s
+Solve:                0.011214 s
 Residual ||Ax-b||/||b||: 4.22e-16
 Peak RSS:             88128 KB
 --- Summary ---
-symbolic:  0.036530 s
-numeric:   0.321625 s (avg over 20 iters)
-solve:     0.015410 s
+symbolic:  0.033607 s
+numeric:   0.324777 s (avg over 20 iters)
+solve:     0.011214 s
 fill-in:   6.59
 residual:  4.22e-16
 peak RSS:  88128 KB
+numeric:   20.21 MFLOP/s
+solve:     585.32 MFLOP/s
+bandwidth: 0.17 GB/s (numeric factorization)
+arith. intensity: 0.1196 FLOP/byte (numeric)
 ```
 
 ## Test matrix
