@@ -60,12 +60,23 @@ build() {
         umfpack)
             cmake .. -DCMAKE_BUILD_TYPE=Release > /dev/null ;;
         graphblas)
+            # Use pkg-config for reliable library detection
+            GB_CFLAGS=$(pkg-config --cflags graphblas 2>/dev/null || echo "-I/usr/include/suitesparse")
+            GB_LIBS=$(pkg-config --libs graphblas 2>/dev/null || echo "-L/usr/lib -lgraphblas -lsuitesparseconfig -lm -lpthread")
+
             g++ -O3 -DNDEBUG -std=c++11 \
-                -I/usr/include -I/usr/include/suitesparse \
+                $GB_CFLAGS \
                 "$REPO_ROOT/benchmarks/graphblas/bench_graphblas.cpp" \
                 -o bench_graphblas \
-                -L$(dirname "$GB_LIB") -L$(dirname "$CFG_LIB") \
-                -lgraphblas -lsuitesparseconfig -lm -lpthread ;;
+                $GB_LIBS 2>&1 || {
+                echo "GraphBLAS compilation failed. Trying fallback..."
+                g++ -O3 -DNDEBUG -std=c++11 \
+                    -I/usr/include -I/usr/include/suitesparse \
+                    "$REPO_ROOT/benchmarks/graphblas/bench_graphblas.cpp" \
+                    -o bench_graphblas \
+                    -L/usr/lib -L/usr/lib/x86_64-linux-gnu \
+                    -lgraphblas -lsuitesparseconfig -lm -lpthread
+            } ;;
     esac
 
     [ "$bench" != "graphblas" ] && make -j"$(nproc)" > /dev/null
@@ -76,7 +87,11 @@ run() {
     local name=$1 binary=$2 args=${3:-}
     local out="$RESULTS/${name}_riscv64.txt"
     echo ">>> Running $name..."
-    "$binary" $args > "$out" 2>&1
+    if ! "$binary" $args > "$out" 2>&1; then
+        echo "    ERROR: $name failed with exit code $?"
+        echo "    Output saved to $out"
+        return 1
+    fi
     echo "    saved to $out"
 }
 
@@ -87,10 +102,10 @@ done
 
 echo ""
 
-run cholmod   "$REPO_ROOT/benchmarks/cholmod/build_riscv64/bench_cholmod"
-run klu       "$REPO_ROOT/benchmarks/klu/build_riscv64/bench_klu"
-run umfpack   "$REPO_ROOT/benchmarks/umfpack/build_riscv64/bench_umfpack" "100 100"
-run graphblas "$REPO_ROOT/benchmarks/graphblas/build_riscv64/bench_graphblas" "$MATRIX"
+run cholmod   "$REPO_ROOT/benchmarks/cholmod/build_riscv64/bench_cholmod" || true
+run klu       "$REPO_ROOT/benchmarks/klu/build_riscv64/bench_klu" || true
+run umfpack   "$REPO_ROOT/benchmarks/umfpack/build_riscv64/bench_umfpack" "100 100" || true
+run graphblas "$REPO_ROOT/benchmarks/graphblas/build_riscv64/bench_graphblas" "$MATRIX" || true
 
 echo ""
 echo "=== Done. Results in $RESULTS ==="
