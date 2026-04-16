@@ -98,7 +98,7 @@ jobs:
             cmake .. -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_CXX_FLAGS="-march=rv64gcv -O3 -DNDEBUG"
             make -j$(nproc)
-            cd /home/runner/work/suitesparse-benchmarks/
+            cd /home/runner/_work/suitesparse-benchmarks/  # Changed: work -> _work
           done
 
       - name: Run benchmarks with RV64GCV and compare
